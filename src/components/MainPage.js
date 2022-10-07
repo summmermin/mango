@@ -1,3 +1,4 @@
+import { API_URL } from "../config/constants";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./MainPage.css";
@@ -10,10 +11,9 @@ const MainPage = () => {
   let [products, setProducts] = React.useState([]);
   useEffect(() => {
     axios
-      .get("http://localhost:8080/products")
+      .get(`${API_URL}/products`)
       .then((res) => {
         products = res.data.product;
-        console.log(products);
         setProducts(products);
       })
       .catch((err) => {
@@ -21,7 +21,7 @@ const MainPage = () => {
       });
   }, []);
   if (products === undefined) {
-    return <h1> 상품정보를 받고있습니다.</h1>;
+    return <h1>상품정보를 받고있습니다.</h1>;
   }
   return (
     <>
@@ -32,26 +32,32 @@ const MainPage = () => {
         <h2>Products</h2>
         <div id="product-list">
           {products.map((product, idx) => {
+            console.log(product);
             return (
               <div className="product-card" key={idx}>
                 <Link className="product-link" to={`/product/${product.id}`}>
                   <div>
-                    <img className="product-img" src={product.imageUrl} alt={product.name} />
+                    <img
+                      className="product-img"
+                      src={product.imageUrl}
+                      alt={product.name}
+                    />
                   </div>
                   <div className="product-content">
                     <span className="product-name">{product.name}</span>
                     <span className="product-price">{product.price}원</span>
-                    <div className="product-seller">
-                      <img className="product-avatar" src="images/icons/avatar.png" alt="" />
-                      <span>내추럴코어</span>
-                    </div>
-                    <div className="product-content">
-                      <span className="product-name">{product.name}</span>
-                      <span className="product-price">{product.price}</span>
-                      <div className="product-footer">
-                        <div className="product-seller"></div>
-                        <span className="product-date">{dayjs(product.createdAt).fromNow()}</span>
+                    <div className="product-footer">
+                      <div className="product-seller">
+                        <img
+                          className="product-avatar"
+                          src="images/icons/avatar.png"
+                          alt=""
+                        />
+                        <span>내추럴코어</span>
                       </div>
+                      <span className="product-date">
+                        {dayjs(product.createdAt).fromNow()}
+                      </span>
                     </div>
                   </div>
                 </Link>

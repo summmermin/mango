@@ -1,9 +1,48 @@
-import { Form, Divider, InputNumber, Button, Upload, Input } from "antd";
+import { API_URL } from "../config/constants";
+import { useState } from "react";
+import { axios } from "axios";
+import { useNavigate } from "react-router-dom";
+import {
+  Form,
+  Divider,
+  InputNumber,
+  Button,
+  Upload,
+  Input,
+  message,
+} from "antd";
 import "./UploadPage.css";
 
 const UploadPage = () => {
+  const [imageUrl, setImageUrl] = useState(null);
+  const navi = useNavigate();
+
   const onFinish = (values) => {
-    console.log("Success:", values);
+    axios
+      .post(`${API_URL}/products`, {
+        name: values.name,
+        description: values.description,
+        seller: values.seller,
+        price: parseInt(values.price),
+        imageUrl: imageUrl,
+      })
+      .then((result) => {
+        console.log(result);
+        navi("/", { replace: true });
+      })
+      .catch(() => {
+        message.error("상품등록시 오류가 있습니다");
+      });
+  };
+  const onChangeImage = (info) => {
+    if (info.file.status === "uploading") {
+      return;
+    }
+    if (info.file.status === "done") {
+      const response = info.file.response;
+      const imageUrl = response.imageUrl;
+      setImageUrl(imageUrl);
+    }
   };
 
   return (
@@ -11,10 +50,22 @@ const UploadPage = () => {
       <div id="upload-container">
         <Form name="uploadForm" onFinish={onFinish}>
           <Form.Item name="upload">
-            <div id="upload-img">
-              <img src="/images/icons/camera.png" />
-              <span>상품 이미지를 업로드 해주세요</span>
-            </div>
+            <Upload
+              name="image"
+              action={`${API_URL}/image`}
+              listType="picture"
+              showUploadList={false}
+              onChange={onChangeImage}
+            >
+              {imageUrl ? (
+                <img id="upload-img" src={`${API_URL}/${imageUrl}`} />
+              ) : (
+                <div id="upload-img-placeholder">
+                  <img src="/images/icons/camera.png" />
+                  <span>상품 이미지를 업로드 해주세요</span>
+                </div>
+              )}
+            </Upload>
           </Form.Item>
           <Divider />
           <Form.Item
@@ -29,7 +80,7 @@ const UploadPage = () => {
               placeholder="상품명을 입력해주세요"
             />
           </Form.Item>
-          {/* row */}
+
           <Form.Item
             label={<span className="upload-label">판매자명</span>}
             name="product-seller"
@@ -42,7 +93,7 @@ const UploadPage = () => {
               placeholder="판매자명을 입력해주세요"
             />
           </Form.Item>
-          {/* row */}
+
           <Form.Item
             label={<span className="upload-label">판매가</span>}
             name="product-price"
@@ -52,7 +103,7 @@ const UploadPage = () => {
           >
             <InputNumber className="upload-name" defaultValue={0} min={0} />
           </Form.Item>
-          {/* row */}
+
           <Form.Item
             label={<span className="upload-label">상품설명</span>}
             name="product-desc"
